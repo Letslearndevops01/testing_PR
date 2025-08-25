@@ -1,0 +1,39 @@
+name: Validate Commit Messages
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate-commit-message:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Fetch PR commits
+        run: |
+          COMMITS=$(git log origin/main..HEAD --pretty=format:"%s")
+          echo "$COMMITS" > commits.txt
+
+      - name: Validate commit messages
+        run: |
+          REGEX='^[A-Za-z]{4}-[0-9]{4}'
+          ERROR=0
+          echo "Checking commit messages..."
+
+          while read -r COMMIT; do
+            echo "Checking: $COMMIT"
+            if [[ ! $COMMIT =~ $REGEX ]]; then
+              echo "❌ Invalid commit message: $COMMIT"
+              ERROR=1
+            fi
+          done < commits.txt
+
+          if [[ $ERROR -eq 1 ]]; then
+            echo "❌ One or more commit messages are invalid. Must match: 4 letters, dash, 4 numbers (e.g., ABCD-1234)"
+            exit 1
+          else
+            echo "✅ All commit messages are valid."
+          fi
