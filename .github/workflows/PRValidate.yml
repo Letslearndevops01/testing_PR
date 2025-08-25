@@ -3,6 +3,8 @@ name: Validate Commit Messages
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
+    branches:
+      - main
 
 jobs:
   validate-commit-message:
