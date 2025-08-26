@@ -31,6 +31,11 @@ jobs:
           echo "Checking commit messages..."
 
           while read -r COMMIT; do
+
+            if [[ -z "$COMMIT" ]] || [[ "$COMMIT" == "Initial commit" ]] || [[ "$COMMIT" == "Create initial commit" ]] || [[ "$COMMIT" =~ ^Merge\ pull\ request.*$ ]] || [[ "$COMMIT" =~ ^Update\.*$ ]] || [[ "$COMMIT" =~ ^Bump\.*$ ]]; then
+              echo "Skipping GitHub-generated/default commit: $COMMIT"
+              continue
+            fi
             echo "Checking: $COMMIT"
             if [[ ! $COMMIT =~ $REGEX ]]; then
               echo "❌ Invalid commit message: $COMMIT"
