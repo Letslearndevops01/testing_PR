@@ -32,10 +32,17 @@ jobs:
 
           while read -r COMMIT; do
 
-            if [[ -z "$COMMIT" ]] || [[ "$COMMIT" == "Initial commit" ]] || [[ "$COMMIT" == "Create initial commit" ]] || [[ "$COMMIT" =~ ^Merge\ pull\ request.*$ ]] || [[ "$COMMIT" =~ ^Update\.*$ ]] || [[ "$COMMIT" =~ ^Bump\.*$ ]]; then
-              echo "Skipping GitHub-generated/default commit: $COMMIT"
+          if [[ -z "$COMMIT" ]] || \
+             [[ "$COMMIT" == "Initial commit" ]] || \
+             [[ "$COMMIT" == "Create initial commit" ]] || \
+             [[ "$COMMIT" =~ ^Merge\ pull\ request.*$ ]] || \
+             [[ "$COMMIT" =~ ^Merge\ branch.*$ ]] || \
+             [[ "$COMMIT" =~ ^Merge\ [0-9a-f]{40}\ into\ [0-9a-f]{40}$ ]] || \
+             [[ "$COMMIT" =~ ^Update\.*$ ]] || \
+             [[ "$COMMIT" =~ ^Bump\.*$ ]]; then
+              echo "⚠️  Skipping GitHub-generated/default commit: $COMMIT"
               continue
-            fi
+           fi
             echo "Checking: $COMMIT"
             if [[ ! $COMMIT =~ $REGEX ]]; then
               echo "❌ Invalid commit message: $COMMIT"
