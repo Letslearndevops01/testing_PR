@@ -26,23 +26,24 @@ jobs:
 
       - name: Validate commit messages
         run: |
-          REGEX='^[A-Za-z]{4}-[0-9]{4}'
+          REGEX='^[A-Za-z]{4}-[0-9]{4}$'
           ERROR=0
-          echo "Checking commit messages..."
+          echo "🔍 Checking commit messages..."
 
           while read -r COMMIT; do
-
-          if [[ -z "$COMMIT" ]] || \
-             [[ "$COMMIT" == "Initial commit" ]] || \
-             [[ "$COMMIT" == "Create initial commit" ]] || \
-             [[ "$COMMIT" =~ ^Merge\ pull\ request.*$ ]] || \
-             [[ "$COMMIT" =~ ^Merge\ branch.*$ ]] || \
-             [[ "$COMMIT" =~ ^Merge\ [0-9a-f]{40}\ into\ [0-9a-f]{40}$ ]] || \
-             [[ "$COMMIT" =~ ^Update\.*$ ]] || \
-             [[ "$COMMIT" =~ ^Bump\.*$ ]]; then
+            if [[ -z "$COMMIT" ]] || \
+               [[ "$COMMIT" == "Initial commit" ]] || \
+               [[ "$COMMIT" == "Create initial commit" ]] || \
+               [[ "$COMMIT" =~ ^Merge\ pull\ request.*$ ]] || \
+               [[ "$COMMIT" =~ ^Merge\ branch.*$ ]] || \
+               [[ "$COMMIT" =~ ^Merge\ [0-9a-f]{40}\ into\ [0-9a-f]{40}$ ]] || \
+               [[ "$COMMIT" =~ ^Merge\ remote-tracking\ branch.*$ ]] || \
+               [[ "$COMMIT" =~ ^Update\.*$ ]] || \
+               [[ "$COMMIT" =~ ^Bump\.*$ ]]; then
               echo "⚠️  Skipping GitHub-generated/default commit: $COMMIT"
               continue
-           fi
+            fi
+
             echo "Checking: $COMMIT"
             if [[ ! $COMMIT =~ $REGEX ]]; then
               echo "❌ Invalid commit message: $COMMIT"
@@ -51,7 +52,8 @@ jobs:
           done < commits.txt
 
           if [[ $ERROR -eq 1 ]]; then
-            echo "❌ One or more commit messages are invalid. Must match: 4 letters, dash, 4 numbers (e.g., ABCD-1234)"
+            echo "❌ One or more commit messages are invalid."
+            echo "👉 Must match: 4 letters, dash, 4 numbers (e.g., ABCD-1234)"
             exit 1
           else
             echo "✅ All commit messages are valid."
