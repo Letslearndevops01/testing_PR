@@ -1,0 +1,59 @@
+name: Validate PR Title and Branch
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  pr-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR title and branch
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const title = pr.title;
+            const branch = pr.head.ref;
+            const author = pr.user.login;
+
+            // Regex for title: Four letters, colon, four digits
+            const titleRegex = /^[A-Za-z]{4}:\d{4}$/;
+
+            // Regex for branch name: same pattern as title
+            const branchRegex = /^[A-Za-z]{4}:\d{4}$/;
+
+            // Automated commit detection
+            const automatedAuthors = ['github-actions[bot]', 'dependabot[bot]'];
+            const automatedPatterns = [
+              /^chore\(.*\): bump version$/,
+              /^auto-update: .+/,
+              /^Merge pull request #\d+ from .+/,
+              /^skip ci/i
+            ];
+
+            // Skip automated commits
+            if (automatedAuthors.includes(author)) {
+              console.log(`Skipping check for automated commit by ${author}`);
+              return;
+            }
+
+            if (automatedPatterns.some(pattern => pattern.test(title))) {
+              console.log(`Skipping check for automated commit message: ${title}`);
+              return;
+            }
+
+            // Validate title
+            if (!titleRegex.test(title)) {
+              core.setFailed(`PR title "${title}" does not match the required format (e.g. ABCD:1234).`);
+              return;
+            }
+
+            // Validate branch name
+            if (!branchRegex.test(branch)) {
+              core.setFailed(`Branch name "${branch}" does not match the required format (e.g. ABCD:1234).`);
+              return;
+            }
+
+            console.log("PR title and branch name are valid.");
